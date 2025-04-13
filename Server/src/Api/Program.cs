@@ -11,7 +11,7 @@ builder.RegisterConfigurationOptions();
 builder.RegisterServices();
 builder.RegisterOptions();
 builder.RegisterDbContext();
-builder.RegisterMassTransit();
+// builder.RegisterMassTransit();
 builder.RegisterHangfire();
 
 builder.Services.AddEndpointsApiExplorer();

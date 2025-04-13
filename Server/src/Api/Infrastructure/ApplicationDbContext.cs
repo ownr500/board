@@ -74,18 +74,20 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(x => x.RoleId);
 
         modelBuilder.Entity<UserEntity>()
-            .Property(x => x.Id).HasDefaultValueSql("newsequentialid()");
+            .Property(x => x.Id).HasDefaultValueSql("uuid_generate_v4()");
         modelBuilder.Entity<RecoveryTokenEntity>()
-            .Property(x => x.Id).HasDefaultValueSql("newsequentialid()");
+            .Property(x => x.Id).HasDefaultValueSql("uuid_generate_v4()");
         modelBuilder.Entity<RevokedTokenEntity>()
-            .Property(x => x.Id).HasDefaultValueSql("newsequentialid()");
+            .Property(x => x.Id).HasDefaultValueSql("uuid_generate_v4()");
         modelBuilder.Entity<RoleEntity>()
-            .Property(x => x.Id).HasDefaultValueSql("newsequentialid()");
+            .Property(x => x.Id).HasDefaultValueSql("uuid_generate_v4()");
         modelBuilder.Entity<TokenEntity>()
-            .Property(x => x.Id).HasDefaultValueSql("newsequentialid()");
+            .Property(x => x.Id).HasDefaultValueSql("uuid_generate_v4()");
         modelBuilder.Entity<UserRoleEntity>()
-            .Property(x => x.Id).HasDefaultValueSql("newsequentialid()");
+            .Property(x => x.Id).HasDefaultValueSql("uuid_generate_v4()");
         
         base.OnModelCreating(modelBuilder);
+        
+        modelBuilder.HasPostgresExtension("uuid-ossp");
     }
 }

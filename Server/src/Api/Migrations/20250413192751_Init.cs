@@ -8,18 +8,31 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace API.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "RecoveryTokens",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "uuid_generate_v4()"),
+                    Token = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
+                    ExpireAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RecoveryTokens", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "RevokedTokens",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Token = table.Column<string>(type: "nvarchar(2048)", maxLength: 2048, nullable: false),
-                    TokenExpireAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "uuid_generate_v4()"),
+                    Token = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
+                    TokenExpireAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -30,8 +43,8 @@ namespace API.Migrations
                 name: "Roles",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RoleName = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "uuid_generate_v4()"),
+                    Role = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -42,13 +55,15 @@ namespace API.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Age = table.Column<int>(type: "int", nullable: false),
-                    Login = table.Column<string>(type: "nvarchar(12)", maxLength: 12, nullable: false),
-                    LoginNormalized = table.Column<string>(type: "nvarchar(12)", maxLength: 12, nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "uuid_generate_v4()"),
+                    FirstName = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    LastName = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    Age = table.Column<int>(type: "integer", nullable: false),
+                    Login = table.Column<string>(type: "character varying(12)", maxLength: 12, nullable: false),
+                    LoginNormalized = table.Column<string>(type: "character varying(12)", maxLength: 12, nullable: false),
+                    Email = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    EmailNormalized = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    PasswordHash = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -59,14 +74,14 @@ namespace API.Migrations
                 name: "Tokens",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AccessToken = table.Column<string>(type: "nvarchar(2048)", maxLength: 2048, nullable: false),
-                    RefreshToken = table.Column<string>(type: "nvarchar(2048)", maxLength: 2048, nullable: false),
-                    RefreshTokenActive = table.Column<bool>(type: "bit", nullable: false),
-                    AccessTokenExpireAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    RefreshTokenExpireAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "uuid_generate_v4()"),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AccessToken = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
+                    RefreshToken = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
+                    RefreshTokenActive = table.Column<bool>(type: "boolean", nullable: false),
+                    AccessTokenExpireAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    RefreshTokenExpireAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -83,9 +98,9 @@ namespace API.Migrations
                 name: "UserRoles",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "uuid_generate_v4()"),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -106,7 +121,7 @@ namespace API.Migrations
 
             migrationBuilder.InsertData(
                 table: "Roles",
-                columns: new[] { "Id", "RoleName" },
+                columns: new[] { "Id", "Role" },
                 values: new object[,]
                 {
                     { new Guid("561622cb-ca02-4c14-9c44-21bc4ba4d2ac"), 2 },
@@ -115,13 +130,19 @@ namespace API.Migrations
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "Age", "FirstName", "LastName", "Login", "LoginNormalized", "PasswordHash" },
-                values: new object[] { new Guid("561bbfaa-c44a-45f9-97c4-7182ba38b85f"), 30, "Admin", "Admin", "admin", "admin", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5" });
+                columns: new[] { "Id", "Age", "Email", "EmailNormalized", "FirstName", "LastName", "Login", "LoginNormalized", "PasswordHash" },
+                values: new object[] { new Guid("561bbfaa-c44a-45f9-97c4-7182ba38b85f"), 30, "admin@5994471abb01112afcc181.com", "admin@5994471abb01112afcc181.com", "Admin", "Admin", "admin", "admin", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5" });
 
             migrationBuilder.InsertData(
                 table: "UserRoles",
                 columns: new[] { "Id", "RoleId", "UserId" },
-                values: new object[] { new Guid("db0a2bde-ae9b-44c8-be2f-17e353a17d1a"), new Guid("c9a36382-bb77-4ee7-8539-681026b43916"), new Guid("561bbfaa-c44a-45f9-97c4-7182ba38b85f") });
+                values: new object[] { new Guid("7c8a2d3d-b820-4fa9-8dc8-b8c25b6c65fe"), new Guid("c9a36382-bb77-4ee7-8539-681026b43916"), new Guid("561bbfaa-c44a-45f9-97c4-7182ba38b85f") });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RecoveryTokens_Token",
+                table: "RecoveryTokens",
+                column: "Token",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_RevokedTokens_Token",
@@ -157,6 +178,12 @@ namespace API.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Users_EmailNormalized",
+                table: "Users",
+                column: "EmailNormalized",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_LoginNormalized",
                 table: "Users",
                 column: "LoginNormalized",
@@ -166,6 +193,9 @@ namespace API.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "RecoveryTokens");
+
             migrationBuilder.DropTable(
                 name: "RevokedTokens");
 

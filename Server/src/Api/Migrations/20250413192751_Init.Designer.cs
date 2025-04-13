@@ -3,17 +3,17 @@ using System;
 using API.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240912200610_addRecoveryToken")]
-    partial class addRecoveryToken
+    [Migration("20250413192751_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,45 +21,47 @@ namespace API.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "7.0.20")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("AUTH-API.Models.Entities.RecoveryTokenEntity", b =>
+            modelBuilder.Entity("API.Core.Entities.RecoveryTokenEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v4()");
 
-                    b.Property<string>("RecoveryToken")
+                    b.Property<DateTimeOffset>("ExpireAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Token")
                         .IsRequired()
                         .HasMaxLength(2048)
-                        .HasColumnType("nvarchar(2048)");
-
-                    b.Property<DateTimeOffset>("RecoveryTokenExpireAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("character varying(2048)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RecoveryToken")
+                    b.HasIndex("Token")
                         .IsUnique();
 
                     b.ToTable("RecoveryTokens");
                 });
 
-            modelBuilder.Entity("AUTH-API.Models.Entities.RevokedTokenEntity", b =>
+            modelBuilder.Entity("API.Core.Entities.RevokedTokenEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v4()");
 
                     b.Property<string>("Token")
                         .IsRequired()
                         .HasMaxLength(2048)
-                        .HasColumnType("nvarchar(2048)");
+                        .HasColumnType("character varying(2048)");
 
                     b.Property<DateTimeOffset>("TokenExpireAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -69,14 +71,15 @@ namespace API.Migrations
                     b.ToTable("RevokedTokens");
                 });
 
-            modelBuilder.Entity("AUTH-API.Models.Entities.RoleEntity", b =>
+            modelBuilder.Entity("API.Core.Entities.RoleEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v4()");
 
-                    b.Property<int>("RoleName")
-                        .HasColumnType("int");
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -86,45 +89,46 @@ namespace API.Migrations
                         new
                         {
                             Id = new Guid("c9a36382-bb77-4ee7-8539-681026b43916"),
-                            RoleName = 1
+                            Role = 1
                         },
                         new
                         {
                             Id = new Guid("561622cb-ca02-4c14-9c44-21bc4ba4d2ac"),
-                            RoleName = 2
+                            Role = 2
                         });
                 });
 
-            modelBuilder.Entity("AUTH-API.Models.Entities.TokenEntity", b =>
+            modelBuilder.Entity("API.Core.Entities.TokenEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v4()");
 
                     b.Property<string>("AccessToken")
                         .IsRequired()
                         .HasMaxLength(2048)
-                        .HasColumnType("nvarchar(2048)");
+                        .HasColumnType("character varying(2048)");
 
                     b.Property<DateTimeOffset>("AccessTokenExpireAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("RefreshToken")
                         .IsRequired()
                         .HasMaxLength(2048)
-                        .HasColumnType("nvarchar(2048)");
+                        .HasColumnType("character varying(2048)");
 
                     b.Property<bool>("RefreshTokenActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset>("RefreshTokenExpireAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -139,49 +143,50 @@ namespace API.Migrations
                     b.ToTable("Tokens");
                 });
 
-            modelBuilder.Entity("AUTH-API.Models.Entities.UserEntity", b =>
+            modelBuilder.Entity("API.Core.Entities.UserEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v4()");
 
                     b.Property<int>("Age")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("EmailNormalized")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<string>("Login")
                         .IsRequired()
                         .HasMaxLength(12)
-                        .HasColumnType("nvarchar(12)");
+                        .HasColumnType("character varying(12)");
 
                     b.Property<string>("LoginNormalized")
                         .IsRequired()
                         .HasMaxLength(12)
-                        .HasColumnType("nvarchar(12)");
+                        .HasColumnType("character varying(12)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("character varying(128)");
 
                     b.HasKey("Id");
 
@@ -198,8 +203,8 @@ namespace API.Migrations
                         {
                             Id = new Guid("561bbfaa-c44a-45f9-97c4-7182ba38b85f"),
                             Age = 30,
-                            Email = "",
-                            EmailNormalized = "",
+                            Email = "admin@5994471abb01112afcc181.com",
+                            EmailNormalized = "admin@5994471abb01112afcc181.com",
                             FirstName = "Admin",
                             LastName = "Admin",
                             Login = "admin",
@@ -208,17 +213,18 @@ namespace API.Migrations
                         });
                 });
 
-            modelBuilder.Entity("AUTH-API.Models.Entities.UserRoleEntity", b =>
+            modelBuilder.Entity("API.Core.Entities.UserRoleEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v4()");
 
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -231,15 +237,15 @@ namespace API.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("82a7e1ec-821e-4cf1-9028-d50c6e15f437"),
+                            Id = new Guid("7c8a2d3d-b820-4fa9-8dc8-b8c25b6c65fe"),
                             RoleId = new Guid("c9a36382-bb77-4ee7-8539-681026b43916"),
                             UserId = new Guid("561bbfaa-c44a-45f9-97c4-7182ba38b85f")
                         });
                 });
 
-            modelBuilder.Entity("AUTH-API.Models.Entities.TokenEntity", b =>
+            modelBuilder.Entity("API.Core.Entities.TokenEntity", b =>
                 {
-                    b.HasOne("AUTH-API.Models.Entities.UserEntity", "User")
+                    b.HasOne("API.Core.Entities.UserEntity", "User")
                         .WithMany("Tokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -248,15 +254,15 @@ namespace API.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("AUTH-API.Models.Entities.UserRoleEntity", b =>
+            modelBuilder.Entity("API.Core.Entities.UserRoleEntity", b =>
                 {
-                    b.HasOne("AUTH-API.Models.Entities.RoleEntity", "Role")
+                    b.HasOne("API.Core.Entities.RoleEntity", "Role")
                         .WithMany("UserRoles")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AUTH-API.Models.Entities.UserEntity", "User")
+                    b.HasOne("API.Core.Entities.UserEntity", "User")
                         .WithMany("UserRoles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -267,12 +273,12 @@ namespace API.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("AUTH-API.Models.Entities.RoleEntity", b =>
+            modelBuilder.Entity("API.Core.Entities.RoleEntity", b =>
                 {
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("AUTH-API.Models.Entities.UserEntity", b =>
+            modelBuilder.Entity("API.Core.Entities.UserEntity", b =>
                 {
                     b.Navigation("Tokens");
 

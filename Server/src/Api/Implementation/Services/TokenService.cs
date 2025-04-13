@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using SharedData;
 
 namespace API.Implementation.Services;
 
@@ -25,7 +24,7 @@ public class TokenService : ITokenService
     private readonly IHttpContextService _httpContextService;
     private readonly ApplicationDbContext _dbContext;
     private readonly IJwtSecurityTokenProvider _jwtSecurityTokenProvider;
-    private readonly IPublishEndpoint _publishEndpoint;
+    // private readonly IPublishEndpoint _publishEndpoint;
     private readonly ISystemClock _systemClock;
     private readonly TokenOptions _options;
 
@@ -35,7 +34,7 @@ public class TokenService : ITokenService
         ApplicationDbContext dbContext,
         IOptions<TokenOptions> options,
         IJwtSecurityTokenProvider jwtSecurityTokenProvider,
-        IPublishEndpoint publishEndpoint,
+        // IPublishEndpoint publishEndpoint,
         ISystemClock systemClock
     )
     {
@@ -43,7 +42,7 @@ public class TokenService : ITokenService
         _httpContextService = httpContextService;
         _dbContext = dbContext;
         _jwtSecurityTokenProvider = jwtSecurityTokenProvider;
-        _publishEndpoint = publishEndpoint;
+        // _publishEndpoint = publishEndpoint;
         _systemClock = systemClock;
         _options = options.Value;
     }
@@ -184,12 +183,12 @@ public class TokenService : ITokenService
                 .ExecuteUpdateAsync(x =>
                     x.SetProperty(p => p.RefreshTokenActive, false), ct);
             
-            //todo publish revoked token to MT
-            await _publishEndpoint.Publish(
-                new RevokedTokens(new List<RevokedToken>
-                {
-                    new RevokedToken(token.AccessToken, token.AccessTokenExpireAt)
-                }), ct);
+            // //todo publish revoked token to MT
+            // await _publishEndpoint.Publish(
+            //     new RevokedTokens(new List<RevokedToken>
+            //     {
+            //         new RevokedToken(token.AccessToken, token.AccessTokenExpireAt)
+            //     }), ct);
         }
 
         await _dbContext.SaveChangesAsync(ct);
@@ -237,13 +236,13 @@ public class TokenService : ITokenService
             await _dbContext.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
             
-            //todo publish revoked tokens to MT
-            await _publishEndpoint.Publish(new RevokedTokens(
-                revokedTokens.Select(x => new RevokedToken(
-                    x.Token,
-                    x.TokenExpireAt)
-                    ).ToList()
-                ), ct);
+            // //todo publish revoked tokens to MT
+            // await _publishEndpoint.Publish(new RevokedTokens(
+            //     revokedTokens.Select(x => new RevokedToken(
+            //         x.Token,
+            //         x.TokenExpireAt)
+            //         ).ToList()
+            //     ), ct);
         }
     }
 

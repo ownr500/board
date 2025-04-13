@@ -7,6 +7,7 @@ using API.Implementation.Services;
 using API.Infrastructure;
 using API.Middleware;
 using Hangfire;
+using Hangfire.PostgreSql;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
@@ -47,34 +48,32 @@ internal static class ApplicationBuilderExtensions
     public static void RegisterDbContext(this WebApplicationBuilder builder)
     {
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-        builder.Services.AddDbContext<ApplicationDbContext>(x => x.UseSqlServer(connectionString));
+        builder.Services.AddDbContext<ApplicationDbContext>(x => x.UseNpgsql(connectionString));
     }
 
-    public static void RegisterMassTransit(this WebApplicationBuilder builder)
-    {
-        builder.Services.AddMassTransit(config =>
-        {
-            config.UsingRabbitMq((context, cfg) =>
-            {
-                cfg.Host("localhost", "/", h =>
-                {
-                    h.Username("rabbit");
-                    h.Password("rabbit");
-                });
-
-                cfg.ConfigureEndpoints(context);
-            });
-        });
-    }
+    // public static void RegisterMassTransit(this WebApplicationBuilder builder)
+    // {
+    //     builder.Services.AddMassTransit(config =>
+    //     {
+    //         config.UsingRabbitMq((context, cfg) =>
+    //         {
+    //             cfg.Host("localhost", "/", h =>
+    //             {
+    //                 h.Username("rabbit");
+    //                 h.Password("rabbit");
+    //             });
+    //
+    //             cfg.ConfigureEndpoints(context);
+    //         });
+    //     });
+    // }
     
     public static void RegisterHangfire(this WebApplicationBuilder builder)
     {
         var connectionString = builder.Configuration.GetConnectionString("HangfireConnection");
         builder.Services.AddHangfire(x =>
-            x.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-                .UseSimpleAssemblyNameTypeSerializer()
-                .UseRecommendedSerializerSettings()
-                .UseSqlServerStorage(connectionString));
+            x.UsePostgreSqlStorage(s => 
+                s.UseNpgsqlConnection(connectionString)));
         builder.Services.AddHangfireServer();
     }
 }
